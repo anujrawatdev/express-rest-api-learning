@@ -2,6 +2,12 @@ const express = require('express');
 const users = require("./MOCK_DATA.json")
 const app = express();
 const PORT = 8000;
+const fs = require('fs');
+console.log(__dirname);
+
+//Middleware - plugin
+app.use(express.urlencoded({ extended : false}));
+app.use(express.json());
 
 //routes  
 app.get("/users",(req,res)=>{
@@ -19,20 +25,42 @@ app.get("/api/users",(req,res)=>{
 })
 
 
-app.route('/api/users/:id').get("/api/users/:id",(req,res)=>{
+app.route('/api/users/:id')
+
+.get((req,res)=>{
     const id = Number(req.params.id) ;
     const user = users.find((user)=> user.id === id);
     return res.json(user);
-}).patch((req,res)=>{
-// 
+})
+.patch((req,res)=>{
+// edit user with id
 return res.json({status:"pending"});
 
-
-}).delete((req,res)=>{
+})
+.delete((req,res)=>{
 //delete user with id
     return res.json({status:"pending"});
-})
+});
 
+app.post("/api/users",(req,res)=>{
+    const body = req.body;
+    users.push({ ...body,id: users.length + 1});
+    fs.writeFile('./MOCK_DATA.json',JSON.stringify(users),(err,data)=>{
+
+         if (err) {
+        console.log(err);
+        return res.status(500).json({ status: "error" });
+        
+    }
+
+    console.log("File Saved");
+
+    
+    return res.json({
+        status:"success",
+        id:users.length});
+    }); 
+});
 
 
 
