@@ -3,11 +3,25 @@ const users = require("./MOCK_DATA.json")
 const app = express();
 const PORT = 8000;
 const fs = require('fs');
-console.log(__dirname);
 
 //Middleware - plugin
 app.use(express.urlencoded({ extended : false}));
-app.use(express.json());
+app.use(express.json({ extended : false}));
+
+app.use((req, res, next)=>{
+    fs.appendFile(
+        'log.txt',
+        `${Date.now()}:${req.ip} : ${req.method} : ${req.path}\n`,
+        (err) =>{
+            if(err){
+                console.log(err);
+            }
+            next();
+        }
+    );
+    
+})
+
 
 //routes  
 app.get("/users",(req,res)=>{
@@ -21,6 +35,8 @@ app.get("/users",(req,res)=>{
 
 //Rest API
 app.get("/api/users",(req,res)=>{
+    console.log(req.headers);
+    res.setHeader("X-myName","Anuj Rawat");
     return res.json(users);
 })
 
@@ -61,7 +77,6 @@ app.post("/api/users",(req,res)=>{
         id:users.length});
     }); 
 });
-
 
 
 
